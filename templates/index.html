@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cars Catalog</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css">
+    <style>
+        .card {
+            transition: transform 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container mx-auto py-8">
+        <input type="text" id="searchInput" placeholder="Search...">
+        <select id="sortSelect" class="ml-4">
+            <option value="">Sort By</option>
+            <option value="name">Name</option>
+        </select>
+        <div id="carContainer" class="grid grid-cols-3 gap-4 mt-4"></div>
+    </div>
+
+    <script>
+        // Function to render cars onto the UI
+        function renderCars(data) {
+            const carContainer = document.getElementById('carContainer');
+            carContainer.innerHTML = ''; // Clear previous content
+
+            data.forEach(car => {
+                // Create card element
+                const card = document.createElement('div');
+                card.classList.add('bg-gray-200', 'p-4', 'rounded', 'shadow');
+                card.innerHTML = `
+                    <img src="${car.image}" alt="${car.name}" class="w-full h-40 object-cover mb-4">
+                    <h2 class="text-xl font-semibold mb-2">${car.name}</h2>
+                    <p class="text-gray-500">${car.category}</p>
+                    <p class="text-gray-700 mb-2">${car.description}</p>
+                `;
+
+                // Append card to container
+                carContainer.appendChild(card);
+            });
+        }
+
+        // Initial data fetch when page loads
+        fetchCars();
+
+        // Function to fetch cars from the server
+        function fetchCars() {
+            fetch('/api/car-list/')
+                .then(response => response.json())
+                .then(data => {
+                    renderCars(data); // Update UI with fetched data
+                })
+                .catch(error => console.error('Error fetching cars:', error));
+        }
+
+        // Event listener for search input
+        document.getElementById('searchInput').addEventListener('input', function() {
+            const searchQuery = this.value.toLowerCase();
+            fetch(`/api/car-list/?search=${searchQuery}`)
+                .then(response => response.json())
+                .then(data => {
+                    renderCars(data); // Update UI with fetched data
+                })
+                .catch(error => console.error('Error fetching cars:', error));
+        });
+
+        // Event listener for sorting select
+        document.getElementById('sortSelect').addEventListener('change', function() {
+            const sortBy = this.value;
+            fetch(`/api/car-list/?ordering=${sortBy}`)
+                .then(response => response.json())
+                .then(data => {
+                    renderCars(data); // Update UI with fetched data
+                })
+                .catch(error => console.error('Error fetching cars:', error));
+        });
+
+
+    </script>
+</body>
+</html>
